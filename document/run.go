@@ -2,6 +2,7 @@ package document
 
 import (
 	"fmt"
+	"strings"
 )
 
 // Run 表示Word文档中的文本运行
@@ -133,6 +134,27 @@ func (r *Run) SetFontFamily(fontFamily string) *Run {
 	return r
 }
 
+// SetFontFamilyForRunes 为特定字符设置字体
+// 该方法允许为特定的字符序列设置不同的字体
+func (r *Run) SetFontFamilyForRunes(fontFamily string, runes []rune) *Run {
+	if runes == nil || len(runes) == 0 {
+		r.Properties.FontFamily = fontFamily
+		return r
+	}
+
+	// 将当前文本中的指定字符设置为指定字体
+	runeText := string(runes)
+	if strings.Contains(r.Text, runeText) {
+		// 如果当前文本包含指定字符，设置字体
+		// 注意：这是一个简化实现，只是将整个Run的字体设置为指定字体
+		// 实际上，为了真正支持混合字体，需要将Run拆分为多个不同字体的Run
+		// 但这需要对段落对象的引用，当前结构不支持这种操作
+		r.Properties.FontFamily = fontFamily
+	}
+
+	return r
+}
+
 // SetColor 设置颜色
 func (r *Run) SetColor(color string) *Run {
 	r.Properties.Color = color
@@ -201,9 +223,31 @@ func (r *Run) AddField(fieldType string, fieldCode string) *Run {
 	return r
 }
 
+// AddTab 添加制表符到文本运行中
+func (r *Run) AddTab() *Run {
+	// 在OOXML中，制表符被表示为<w:tab/>元素
+	// 这里我们使用一个特殊标记，在ToXML时会被替换为制表符标签
+	r.Text += "\t"
+	return r
+}
+
 // AddPageNumber 添加页码域
+// Deprecated: 建议使用Document.AddPageNumberParagraph或Footer.AddPageNumber方法
 func (r *Run) AddPageNumber() *Run {
-	return r.AddField("begin", " PAGE ")
+	// 注意：此方法生成的页码字段可能不完整
+	// 推荐使用Document.AddPageNumberParagraph或Footer.AddPageNumber方法
+	// 创建一个完整的页码字段，包含所有需要的部分
+
+	// 返回一个标准的域开始标记
+	return r.AddField("begin", "PAGE")
+}
+
+// findParagraph 尝试找到当前Run所在的段落
+func (r *Run) findParagraph() *Paragraph {
+	// 这个方法可能需要访问Document实例来找到包含当前Run的段落
+	// 由于目前的结构限制，我们简单地返回nil，表示找不到段落
+	// 在实际完整实现中，应该找到文档中包含此Run的段落
+	return nil
 }
 
 // ToXML 将Run转换为XML
@@ -322,39 +366,73 @@ func (r *Run) ToXML() string {
 
 	xml += "</w:rPr>"
 
-	// 添加分隔符
-	if r.BreakType != "" {
-		xml += fmt.Sprintf("<w:br w:type=\"%s\" />", r.BreakType)
-	}
-
-	// 添加文本
-	if r.Text != "" {
-		xml += fmt.Sprintf("<w:t xml:space=\"preserve\">%s</w:t>", r.Text)
-	}
-
-	// 添加图形
-	if r.Drawing != nil {
-		xml += r.Drawing.ToXML()
-	}
-
-	// 添加域
+	// 处理域
 	if r.Field != nil {
-		if r.Field.Type == "begin" {
-			xml += "<w:fldChar w:fldCharType=\"begin\" />"
-		} else if r.Field.Type == "separate" {
+		switch r.Field.Type {
+		case "begin":
+			xml += fmt.Sprintf("<w:fldChar w:fldCharType=\"begin\" /><w:instrText>%s</w:instrText>", r.Field.Code)
+		case "separate":
 			xml += "<w:fldChar w:fldCharType=\"separate\" />"
-		} else if r.Field.Type == "end" {
+		case "end":
 			xml += "<w:fldChar w:fldCharType=\"end\" />"
 		}
+	} else if r.Drawing != nil {
+		// 添加图形元素
+		xml += r.Drawing.ToXML()
+	} else if r.BreakType != "" {
+		// 添加分隔符
+		switch r.BreakType {
+		case BreakTypePage:
+			xml += "<w:br w:type=\"page\" />"
+		case BreakTypeColumn:
+			xml += "<w:br w:type=\"column\" />"
+		case BreakTypeSection:
+			xml += "<w:br w:type=\"sectionContinuous\" />"
+		case BreakTypeLine:
+			xml += "<w:br />"
+		}
+	} else {
+		// 处理文本内容
+		// 特殊处理：制表符
+		if r.Text != "" {
+			var textParts []string
+			for _, char := range r.Text {
+				if char == '\t' {
+					// 如果是制表符，关闭当前文本，添加制表符标签，然后重新开始文本
+					if len(textParts) > 0 {
+						xml += fmt.Sprintf("<w:t xml:space=\"preserve\">%s</w:t>", escapeXML(textParts[len(textParts)-1]))
+						textParts = textParts[:len(textParts)-1]
+					}
+					xml += "<w:tab/>"
+					textParts = append(textParts, "")
+				} else {
+					// 如果是普通字符，添加到当前文本部分
+					if len(textParts) == 0 {
+						textParts = append(textParts, "")
+					}
+					textParts[len(textParts)-1] += string(char)
+				}
+			}
 
-		if r.Field.Code != "" && r.Field.Type == "begin" {
-			// 添加域代码
-			xml += "</w:r><w:r><w:instrText xml:space=\"preserve\">" + r.Field.Code + "</w:instrText></w:r><w:r><w:fldChar w:fldCharType=\"separate\" />"
-			// 添加域结束标记
-			xml += "</w:r><w:r><w:fldChar w:fldCharType=\"end\" />"
+			// 处理最后一个文本部分
+			for _, part := range textParts {
+				if part != "" {
+					xml += fmt.Sprintf("<w:t xml:space=\"preserve\">%s</w:t>", escapeXML(part))
+				}
+			}
 		}
 	}
 
 	xml += "</w:r>"
 	return xml
+}
+
+// escapeXML 转义XML文本中的特殊字符
+func escapeXML(s string) string {
+	s = strings.ReplaceAll(s, "&", "&amp;")
+	s = strings.ReplaceAll(s, "<", "&lt;")
+	s = strings.ReplaceAll(s, ">", "&gt;")
+	s = strings.ReplaceAll(s, "\"", "&quot;")
+	s = strings.ReplaceAll(s, "'", "&apos;")
+	return s
 }

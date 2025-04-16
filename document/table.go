@@ -133,9 +133,28 @@ func (t *Table) AddRow() *TableRow {
 }
 
 // SetWidth 设置表格宽度
-func (t *Table) SetWidth(width int, widthType string) *Table {
-	t.Properties.Width = width
-	t.Properties.WidthType = widthType
+// width可以是整数(表示twip单位)或字符串(如"100%"表示百分比)
+func (t *Table) SetWidth(width interface{}, widthType string) *Table {
+	switch v := width.(type) {
+	case int:
+		t.Properties.Width = v
+		t.Properties.WidthType = widthType
+	case string:
+		// 处理百分比格式，如"100%"
+		if v == "100%" && widthType == "pct" {
+			// Word中百分比是用整数表示的，5000 = 100%
+			t.Properties.Width = 5000
+			t.Properties.WidthType = "pct"
+		} else {
+			// 默认为自动宽度
+			t.Properties.Width = 0
+			t.Properties.WidthType = "auto"
+		}
+	default:
+		// 默认为自动宽度
+		t.Properties.Width = 0
+		t.Properties.WidthType = "auto"
+	}
 	return t
 }
 
@@ -159,6 +178,16 @@ func (t *Table) SetLayout(layout string) *Table {
 
 // SetBorders 设置表格边框
 func (t *Table) SetBorders(position string, style string, size int, color string) *Table {
+	// 如果style为空，设置为"none"
+	if style == "" {
+		style = "none"
+	}
+
+	// 如果color为空，设置为默认颜色黑色
+	if color == "" {
+		color = "000000"
+	}
+
 	border := &Border{
 		Style: style,
 		Size:  size,
@@ -302,9 +331,28 @@ func (c *TableCell) AddTable(rows, cols int) *Table {
 }
 
 // SetWidth 设置单元格宽度
-func (c *TableCell) SetWidth(width int, widthType string) *TableCell {
-	c.Properties.Width = width
-	c.Properties.WidthType = widthType
+// width可以是整数(表示twip单位)或字符串(如"100%"表示百分比)
+func (c *TableCell) SetWidth(width interface{}, widthType string) *TableCell {
+	switch v := width.(type) {
+	case int:
+		c.Properties.Width = v
+		c.Properties.WidthType = widthType
+	case string:
+		// 处理百分比格式，如"100%"
+		if v == "100%" && widthType == "pct" {
+			// Word中百分比是用整数表示的，5000 = 100%
+			c.Properties.Width = 5000
+			c.Properties.WidthType = "pct"
+		} else {
+			// 默认为自动宽度
+			c.Properties.Width = 0
+			c.Properties.WidthType = "auto"
+		}
+	default:
+		// 默认为自动宽度
+		c.Properties.Width = 0
+		c.Properties.WidthType = "auto"
+	}
 	return c
 }
 
@@ -318,6 +366,16 @@ func (c *TableCell) SetVertAlign(vertAlign string) *TableCell {
 func (c *TableCell) SetBorders(position string, style string, size int, color string) *TableCell {
 	if c.Properties.Borders == nil {
 		c.Properties.Borders = &TableBorders{}
+	}
+
+	// 如果style为空，设置为"none"
+	if style == "" {
+		style = "none"
+	}
+
+	// 如果color为空，设置为默认颜色黑色
+	if color == "" {
+		color = "000000"
 	}
 
 	border := &Border{
@@ -556,19 +614,28 @@ func (c *TableCell) ToXML() string {
 	// 添加单元格属性
 	xml += "<w:tcPr>"
 
-	// 单元格宽度
+	// 1. cnfStyle - 暂不实现
+
+	// 2. 单元格宽度 (tcW)
 	if c.Properties.Width > 0 {
 		xml += "<w:tcW w:w=\"" + fmt.Sprintf("%d", c.Properties.Width) + "\" w:type=\"" + c.Properties.WidthType + "\" />"
 	} else {
 		xml += "<w:tcW w:w=\"0\" w:type=\"auto\" />"
 	}
 
-	// 垂直对齐方式
-	if c.Properties.VertAlign != "" {
-		xml += "<w:vAlign w:val=\"" + c.Properties.VertAlign + "\" />"
+	// 3. 跨列数 (gridSpan)
+	if c.Properties.GridSpan > 1 {
+		xml += "<w:gridSpan w:val=\"" + fmt.Sprintf("%d", c.Properties.GridSpan) + "\" />"
 	}
 
-	// 单元格边框
+	// 4. hMerge - 暂不实现
+
+	// 5. 垂直合并 (vMerge)
+	if c.Properties.VMerge != "" {
+		xml += "<w:vMerge w:val=\"" + c.Properties.VMerge + "\" />"
+	}
+
+	// 6. 单元格边框 (tcBorders)
 	if c.Properties.Borders != nil {
 		xml += "<w:tcBorders>"
 		if c.Properties.Borders.Top != nil {
@@ -586,30 +653,31 @@ func (c *TableCell) ToXML() string {
 		xml += "</w:tcBorders>"
 	}
 
-	// 底纹
+	// 7. 底纹 (shd)
 	if c.Properties.Shading != nil {
 		xml += "<w:shd w:val=\"" + c.Properties.Shading.Pattern + "\" w:fill=\"" + c.Properties.Shading.Fill + "\" w:color=\"" + c.Properties.Shading.Color + "\" />"
 	}
 
-	// 跨列数
-	if c.Properties.GridSpan > 1 {
-		xml += "<w:gridSpan w:val=\"" + fmt.Sprintf("%d", c.Properties.GridSpan) + "\" />"
-	}
-
-	// 垂直合并
-	if c.Properties.VMerge != "" {
-		xml += "<w:vMerge w:val=\"" + c.Properties.VMerge + "\" />"
-	}
-
-	// 不换行
+	// 8. 不换行 (noWrap)
 	if c.Properties.NoWrap {
 		xml += "<w:noWrap />"
 	}
 
-	// 适应文本
+	// 9. tcMar - 暂不实现
+
+	// 10. textDirection - 暂不实现
+
+	// 11. 适应文本 (tcFitText)
 	if c.Properties.FitText {
-		xml += "<w:fitText />"
+		xml += "<w:tcFitText />"
 	}
+
+	// 12. 垂直对齐方式 (vAlign)
+	if c.Properties.VertAlign != "" {
+		xml += "<w:vAlign w:val=\"" + c.Properties.VertAlign + "\" />"
+	}
+
+	// 13. hideMark - 暂不实现
 
 	xml += "</w:tcPr>"
 

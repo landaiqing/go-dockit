@@ -115,6 +115,16 @@ func (p *Paragraph) SetSpacingLine(spacing int, rule string) *Paragraph {
 	return p
 }
 
+// SetLineSpacing 设置行距
+func (p *Paragraph) SetLineSpacing(lineSpacing float64, rule string) *Paragraph {
+	// Word中行距值的计算：
+	// 1.5倍行距 = 360 (240 * 1.5)
+	// 2.0倍行距 = 480 (240 * 2.0)
+	// 3.0倍行距 = 720 (240 * 3.0)
+	spacing := int(240 * lineSpacing)
+	return p.SetSpacingLine(spacing, rule)
+}
+
 // SetKeepNext 设置与下段同页
 func (p *Paragraph) SetKeepNext(keepNext bool) *Paragraph {
 	p.Properties.KeepNext = keepNext
@@ -148,6 +158,16 @@ func (p *Paragraph) SetNumbering(numID, numLevel int) *Paragraph {
 
 // SetBorder 设置边框
 func (p *Paragraph) SetBorder(position string, style string, size int, color string, space int) *Paragraph {
+	// 如果style为空，设置为"none"
+	if style == "" {
+		style = "none"
+	}
+
+	// 如果color为空，设置为默认颜色黑色
+	if color == "" {
+		color = "000000"
+	}
+
 	border := &Border{
 		Style: style,
 		Size:  size,

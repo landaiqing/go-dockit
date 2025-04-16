@@ -56,6 +56,45 @@ func (f *Footer) AddTable(rows, cols int) *Table {
 	return t
 }
 
+// AddPageNumber 添加一个居中的页码
+func (f *Footer) AddPageNumber() *Paragraph {
+	// 创建一个新段落
+	para := f.AddParagraph()
+	para.SetAlignment("center")
+
+	// 添加"第"文本
+	para.AddRun().AddText("第 ")
+
+	// 创建页码域的所有部分
+	// 1. 域开始
+	fieldBegin := para.AddRun()
+	fieldBegin.Field = &Field{
+		Type: "begin",
+		Code: "PAGE",
+	}
+
+	// 2. 域分隔符
+	fieldSeparate := para.AddRun()
+	fieldSeparate.Field = &Field{
+		Type: "separate",
+	}
+
+	// 3. 页码内容（在Word中会替换为实际页码）
+	fieldContent := para.AddRun()
+	fieldContent.AddText("1")
+
+	// 4. 域结束
+	fieldEnd := para.AddRun()
+	fieldEnd.Field = &Field{
+		Type: "end",
+	}
+
+	// 添加"页"文本
+	para.AddRun().AddText(" 页")
+
+	return para
+}
+
 // ToXML 将页眉转换为XML
 func (h *Header) ToXML() string {
 	xml := "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>"

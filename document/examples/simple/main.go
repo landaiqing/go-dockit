@@ -134,11 +134,16 @@ func main() {
 
 	// 添加页脚并同时添加页脚引用
 	footer := doc.AddFooterWithReference("default")
-	footerPara := footer.AddParagraph()
-	footerPara.SetAlignment("center")
-	footerPara.AddRun().AddText("第 ")
-	footerPara.AddRun().AddPageNumber()
-	footerPara.AddRun().AddText(" 页")
+
+	// 使用新的方法添加完整的页码段落
+	footer.AddPageNumber()
+
+	// 注释掉旧的方式，它可能会导致页码显示为"第PAGE页"
+	// footerPara := footer.AddParagraph()
+	// footerPara.SetAlignment("center")
+	// footerPara.AddRun().AddText("第 ")
+	// footerPara.AddRun().AddPageNumber()
+	// footerPara.AddRun().AddText(" 页")
 
 	// 保存文档
 	err := doc.Save("./document/examples/simple/example.docx")

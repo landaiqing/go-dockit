@@ -186,43 +186,12 @@ func (p *Paragraph) ToXML() string {
 	// 添加段落属性
 	xml += "<w:pPr>"
 
-	// 对齐方式
-	if p.Properties.Alignment != "" {
-		xml += "<w:jc w:val=\"" + p.Properties.Alignment + "\" />"
+	// 样式 (必须在最前面)
+	if p.Properties.StyleID != "" {
+		xml += fmt.Sprintf("<w:pStyle w:val=\"%s\" />", p.Properties.StyleID)
 	}
 
-	// 缩进
-	if p.Properties.IndentLeft > 0 || p.Properties.IndentRight > 0 || p.Properties.IndentFirstLine > 0 {
-		xml += "<w:ind"
-		if p.Properties.IndentLeft > 0 {
-			xml += " w:left=\"" + fmt.Sprintf("%d", p.Properties.IndentLeft) + "\""
-		}
-		if p.Properties.IndentRight > 0 {
-			xml += " w:right=\"" + fmt.Sprintf("%d", p.Properties.IndentRight) + "\""
-		}
-		if p.Properties.IndentFirstLine > 0 {
-			xml += " w:firstLine=\"" + fmt.Sprintf("%d", p.Properties.IndentFirstLine) + "\""
-		}
-		xml += " />"
-	}
-
-	// 间距
-	if p.Properties.SpacingBefore > 0 || p.Properties.SpacingAfter > 0 || p.Properties.SpacingLine > 0 {
-		xml += "<w:spacing"
-		if p.Properties.SpacingBefore > 0 {
-			xml += " w:before=\"" + fmt.Sprintf("%d", p.Properties.SpacingBefore) + "\""
-		}
-		if p.Properties.SpacingAfter > 0 {
-			xml += " w:after=\"" + fmt.Sprintf("%d", p.Properties.SpacingAfter) + "\""
-		}
-		if p.Properties.SpacingLine > 0 {
-			xml += " w:line=\"" + fmt.Sprintf("%d", p.Properties.SpacingLine) + "\""
-			xml += " w:lineRule=\"" + p.Properties.SpacingLineRule + "\""
-		}
-		xml += " />"
-	}
-
-	// 分页控制
+	// 分页控制 (必须在编号前面)
 	if p.Properties.KeepNext {
 		xml += "<w:keepNext />"
 	}
@@ -236,16 +205,11 @@ func (p *Paragraph) ToXML() string {
 		xml += "<w:widowControl />"
 	}
 
-	// 样式
-	if p.Properties.StyleID != "" {
-		xml += "<w:pStyle w:val=\"" + p.Properties.StyleID + "\" />"
-	}
-
 	// 编号
 	if p.Properties.NumID > 0 {
 		xml += "<w:numPr>"
-		xml += "<w:numId w:val=\"" + fmt.Sprintf("%d", p.Properties.NumID) + "\" />"
-		xml += "<w:ilvl w:val=\"" + fmt.Sprintf("%d", p.Properties.NumLevel) + "\" />"
+		xml += fmt.Sprintf("<w:ilvl w:val=\"%d\" />", p.Properties.NumLevel)
+		xml += fmt.Sprintf("<w:numId w:val=\"%d\" />", p.Properties.NumID)
 		xml += "</w:numPr>"
 	}
 
@@ -254,37 +218,78 @@ func (p *Paragraph) ToXML() string {
 		p.Properties.BorderLeft != nil || p.Properties.BorderRight != nil {
 		xml += "<w:pBdr>"
 		if p.Properties.BorderTop != nil {
-			xml += "<w:top w:val=\"" + p.Properties.BorderTop.Style + "\""
-			xml += " w:sz=\"" + fmt.Sprintf("%d", p.Properties.BorderTop.Size) + "\""
-			xml += " w:space=\"" + fmt.Sprintf("%d", p.Properties.BorderTop.Space) + "\""
-			xml += " w:color=\"" + p.Properties.BorderTop.Color + "\" />"
+			xml += fmt.Sprintf("<w:top w:val=\"%s\" w:sz=\"%d\" w:space=\"%d\" w:color=\"%s\" />",
+				p.Properties.BorderTop.Style,
+				p.Properties.BorderTop.Size,
+				p.Properties.BorderTop.Space,
+				p.Properties.BorderTop.Color)
 		}
 		if p.Properties.BorderBottom != nil {
-			xml += "<w:bottom w:val=\"" + p.Properties.BorderBottom.Style + "\""
-			xml += " w:sz=\"" + fmt.Sprintf("%d", p.Properties.BorderBottom.Size) + "\""
-			xml += " w:space=\"" + fmt.Sprintf("%d", p.Properties.BorderBottom.Space) + "\""
-			xml += " w:color=\"" + p.Properties.BorderBottom.Color + "\" />"
+			xml += fmt.Sprintf("<w:bottom w:val=\"%s\" w:sz=\"%d\" w:space=\"%d\" w:color=\"%s\" />",
+				p.Properties.BorderBottom.Style,
+				p.Properties.BorderBottom.Size,
+				p.Properties.BorderBottom.Space,
+				p.Properties.BorderBottom.Color)
 		}
 		if p.Properties.BorderLeft != nil {
-			xml += "<w:left w:val=\"" + p.Properties.BorderLeft.Style + "\""
-			xml += " w:sz=\"" + fmt.Sprintf("%d", p.Properties.BorderLeft.Size) + "\""
-			xml += " w:space=\"" + fmt.Sprintf("%d", p.Properties.BorderLeft.Space) + "\""
-			xml += " w:color=\"" + p.Properties.BorderLeft.Color + "\" />"
+			xml += fmt.Sprintf("<w:left w:val=\"%s\" w:sz=\"%d\" w:space=\"%d\" w:color=\"%s\" />",
+				p.Properties.BorderLeft.Style,
+				p.Properties.BorderLeft.Size,
+				p.Properties.BorderLeft.Space,
+				p.Properties.BorderLeft.Color)
 		}
 		if p.Properties.BorderRight != nil {
-			xml += "<w:right w:val=\"" + p.Properties.BorderRight.Style + "\""
-			xml += " w:sz=\"" + fmt.Sprintf("%d", p.Properties.BorderRight.Size) + "\""
-			xml += " w:space=\"" + fmt.Sprintf("%d", p.Properties.BorderRight.Space) + "\""
-			xml += " w:color=\"" + p.Properties.BorderRight.Color + "\" />"
+			xml += fmt.Sprintf("<w:right w:val=\"%s\" w:sz=\"%d\" w:space=\"%d\" w:color=\"%s\" />",
+				p.Properties.BorderRight.Style,
+				p.Properties.BorderRight.Size,
+				p.Properties.BorderRight.Space,
+				p.Properties.BorderRight.Color)
 		}
 		xml += "</w:pBdr>"
 	}
 
 	// 底纹
 	if p.Properties.Shading != nil {
-		xml += "<w:shd w:val=\"" + p.Properties.Shading.Pattern + "\""
-		xml += " w:fill=\"" + p.Properties.Shading.Fill + "\""
-		xml += " w:color=\"" + p.Properties.Shading.Color + "\" />"
+		xml += fmt.Sprintf("<w:shd w:val=\"%s\" w:fill=\"%s\" w:color=\"%s\" />",
+			p.Properties.Shading.Pattern,
+			p.Properties.Shading.Fill,
+			p.Properties.Shading.Color)
+	}
+
+	// 间距
+	if p.Properties.SpacingBefore > 0 || p.Properties.SpacingAfter > 0 || p.Properties.SpacingLine > 0 {
+		xml += "<w:spacing"
+		if p.Properties.SpacingBefore > 0 {
+			xml += fmt.Sprintf(" w:before=\"%d\"", p.Properties.SpacingBefore)
+		}
+		if p.Properties.SpacingAfter > 0 {
+			xml += fmt.Sprintf(" w:after=\"%d\"", p.Properties.SpacingAfter)
+		}
+		if p.Properties.SpacingLine > 0 {
+			xml += fmt.Sprintf(" w:line=\"%d\"", p.Properties.SpacingLine)
+			xml += fmt.Sprintf(" w:lineRule=\"%s\"", p.Properties.SpacingLineRule)
+		}
+		xml += " />"
+	}
+
+	// 缩进
+	if p.Properties.IndentLeft > 0 || p.Properties.IndentRight > 0 || p.Properties.IndentFirstLine > 0 {
+		xml += "<w:ind"
+		if p.Properties.IndentLeft > 0 {
+			xml += fmt.Sprintf(" w:left=\"%d\"", p.Properties.IndentLeft)
+		}
+		if p.Properties.IndentRight > 0 {
+			xml += fmt.Sprintf(" w:right=\"%d\"", p.Properties.IndentRight)
+		}
+		if p.Properties.IndentFirstLine > 0 {
+			xml += fmt.Sprintf(" w:firstLine=\"%d\"", p.Properties.IndentFirstLine)
+		}
+		xml += " />"
+	}
+
+	// 对齐方式
+	if p.Properties.Alignment != "" {
+		xml += fmt.Sprintf("<w:jc w:val=\"%s\" />", p.Properties.Alignment)
 	}
 
 	xml += "</w:pPr>"

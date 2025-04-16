@@ -59,7 +59,7 @@ func (f *Footer) AddTable(rows, cols int) *Table {
 // ToXML 将页眉转换为XML
 func (h *Header) ToXML() string {
 	xml := "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>"
-	xml += "<w:hdr xmlns:w=\"http://schemas.openxmlformats.org/wordprocessingml/2006/main\">"
+	xml += "<w:hdr xmlns:w=\"http://schemas.openxmlformats.org/wordprocessingml/2006/main\" xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\">"
 
 	// 添加所有内容元素的XML
 	for _, content := range h.Content {
@@ -78,7 +78,7 @@ func (h *Header) ToXML() string {
 // ToXML 将页脚转换为XML
 func (f *Footer) ToXML() string {
 	xml := "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>"
-	xml += "<w:ftr xmlns:w=\"http://schemas.openxmlformats.org/wordprocessingml/2006/main\">"
+	xml += "<w:ftr xmlns:w=\"http://schemas.openxmlformats.org/wordprocessingml/2006/main\" xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\">"
 
 	// 添加所有内容元素的XML
 	for _, content := range f.Content {

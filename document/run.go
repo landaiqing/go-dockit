@@ -206,115 +206,130 @@ func (r *Run) AddPageNumber() *Run {
 	return r.AddField("begin", " PAGE ")
 }
 
-// ToXML 将文本运行转换为XML
+// ToXML 将Run转换为XML
 func (r *Run) ToXML() string {
 	xml := "<w:r>"
 
-	// 添加文本运行属性
+	// 添加运行属性 - 严格按照Word XML规范顺序
 	xml += "<w:rPr>"
 
-	// 字体
+	// 运行样式（缺失，预留位置）
+
+	// 1. 字体
 	if r.Properties.FontFamily != "" {
-		xml += "<w:rFonts w:ascii=\"" + r.Properties.FontFamily + "\""
-		xml += " w:eastAsia=\"" + r.Properties.FontFamily + "\""
-		xml += " w:hAnsi=\"" + r.Properties.FontFamily + "\""
-		xml += " w:cs=\"" + r.Properties.FontFamily + "\" />"
+		xml += fmt.Sprintf("<w:rFonts w:ascii=\"%s\" w:hAnsi=\"%s\" w:eastAsia=\"%s\" w:cs=\"%s\" />",
+			r.Properties.FontFamily,
+			r.Properties.FontFamily,
+			r.Properties.FontFamily,
+			r.Properties.FontFamily)
 	}
 
-	// 字号
-	if r.Properties.FontSize > 0 {
-		xml += "<w:sz w:val=\"" + fmt.Sprintf("%d", r.Properties.FontSize) + "\" />"
-		xml += "<w:szCs w:val=\"" + fmt.Sprintf("%d", r.Properties.FontSize) + "\" />"
-	}
-
-	// 颜色
-	if r.Properties.Color != "" {
-		xml += "<w:color w:val=\"" + r.Properties.Color + "\" />"
-	}
-
-	// 粗体
+	// 2. 加粗
 	if r.Properties.Bold {
 		xml += "<w:b />"
+		// 3. 复杂文本加粗
 		xml += "<w:bCs />"
 	}
 
-	// 斜体
+	// 4. 斜体
 	if r.Properties.Italic {
 		xml += "<w:i />"
+		// 5. 复杂文本斜体
 		xml += "<w:iCs />"
 	}
 
-	// 下划线
-	if r.Properties.Underline != "" {
-		xml += "<w:u w:val=\"" + r.Properties.Underline + "\" />"
-	}
-
-	// 删除线
-	if r.Properties.Strike {
-		xml += "<w:strike />"
-	}
-
-	// 双删除线
-	if r.Properties.DoubleStrike {
-		xml += "<w:dstrike />"
-	}
-
-	// 突出显示颜色
-	if r.Properties.Highlight != "" {
-		xml += "<w:highlight w:val=\"" + r.Properties.Highlight + "\" />"
-	}
-
-	// 全部大写
+	// 6. 全部大写
 	if r.Properties.Caps {
 		xml += "<w:caps />"
 	}
 
-	// 小型大写
+	// 7. 小型大写
 	if r.Properties.SmallCaps {
 		xml += "<w:smallCaps />"
 	}
 
-	// 字符间距
+	// 8. 删除线
+	if r.Properties.Strike {
+		xml += "<w:strike />"
+	}
+
+	// 9. 双删除线
+	if r.Properties.DoubleStrike {
+		xml += "<w:dstrike />"
+	}
+
+	// 10-18. 其他格式（outline, shadow, emboss等，缺失，预留位置）
+
+	// 19. 颜色
+	if r.Properties.Color != "" {
+		xml += fmt.Sprintf("<w:color w:val=\"%s\" />", r.Properties.Color)
+	}
+
+	// 20. 字符间距
 	if r.Properties.CharacterSpacing != 0 {
-		xml += "<w:spacing w:val=\"" + fmt.Sprintf("%d", r.Properties.CharacterSpacing) + "\" />"
+		xml += fmt.Sprintf("<w:spacing w:val=\"%d\" />", r.Properties.CharacterSpacing)
 	}
 
-	// 底纹
-	if r.Properties.Shading != nil {
-		xml += "<w:shd w:val=\"" + r.Properties.Shading.Pattern + "\""
-		xml += " w:fill=\"" + r.Properties.Shading.Fill + "\""
-		xml += " w:color=\"" + r.Properties.Shading.Color + "\" />"
+	// 21-23. 其他属性（缺失，预留位置）
+
+	// 24. 字号
+	if r.Properties.FontSize > 0 {
+		xml += fmt.Sprintf("<w:sz w:val=\"%d\" />", r.Properties.FontSize)
+		// 25. 复杂文本字号
+		xml += fmt.Sprintf("<w:szCs w:val=\"%d\" />", r.Properties.FontSize)
 	}
 
-	// 上标/下标
+	// 26. 突出显示
+	if r.Properties.Highlight != "" {
+		xml += fmt.Sprintf("<w:highlight w:val=\"%s\" />", r.Properties.Highlight)
+	}
+
+	// 27. 下划线
+	if r.Properties.Underline != "" {
+		xml += fmt.Sprintf("<w:u w:val=\"%s\" />", r.Properties.Underline)
+	}
+
+	// 28-31. 其他属性（缺失，预留位置）
+
+	// 32. 上标/下标
 	if r.Properties.Superscript {
 		xml += "<w:vertAlign w:val=\"superscript\" />"
 	} else if r.Properties.Subscript {
 		xml += "<w:vertAlign w:val=\"subscript\" />"
 	} else if r.Properties.VertAlign != "" {
-		xml += "<w:vertAlign w:val=\"" + r.Properties.VertAlign + "\" />"
+		xml += fmt.Sprintf("<w:vertAlign w:val=\"%s\" />", r.Properties.VertAlign)
 	}
 
-	// 从右到左文本方向
+	// 33. 从右到左文本方向
 	if r.Properties.RTL {
 		xml += "<w:rtl />"
 	}
 
-	// 语言
+	// 34-35. 其他属性（缺失，预留位置）
+
+	// 36. 语言
 	if r.Properties.Language != "" {
-		xml += "<w:lang w:val=\"" + r.Properties.Language + "\" />"
+		xml += fmt.Sprintf("<w:lang w:val=\"%s\" />", r.Properties.Language)
+	}
+
+	// 底纹（shd应该在位置30）
+	if r.Properties.Shading != nil {
+		xml += fmt.Sprintf("<w:shd w:val=\"%s\" w:fill=\"%s\" w:color=\"%s\" />",
+			r.Properties.Shading.Pattern,
+			r.Properties.Shading.Fill,
+			r.Properties.Shading.Color)
 	}
 
 	xml += "</w:rPr>"
 
 	// 添加分隔符
 	if r.BreakType != "" {
-		xml += "<w:br w:type=\"" + r.BreakType + "\" />"
+		xml += fmt.Sprintf("<w:br w:type=\"%s\" />", r.BreakType)
 	}
 
 	// 添加文本
 	if r.Text != "" {
-		xml += "<w:t xml:space=\"preserve\">" + r.Text + "</w:t>"
+		xml += fmt.Sprintf("<w:t xml:space=\"preserve\">%s</w:t>", r.Text)
 	}
 
 	// 添加图形

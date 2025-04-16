@@ -40,7 +40,6 @@ func NewContentTypes() *ContentTypes {
 	ct.AddOverride("/xl/workbook.xml", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml")
 	ct.AddOverride("/xl/styles.xml", "application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml")
 	ct.AddOverride("/xl/theme/theme1.xml", "application/vnd.openxmlformats-officedocument.theme+xml")
-	ct.AddOverride("/xl/worksheets/sheet1.xml", "application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml")
 	ct.AddOverride("/xl/sharedStrings.xml", "application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml")
 
 	return ct

@@ -130,7 +130,19 @@ func (b *Body) ToXML() string {
 	}
 
 	// 添加节属性
-	xml += "<w:sectPr>"
+	xml += "<w:sectPr xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\">"
+
+	// 页眉引用
+	for _, headerRef := range b.SectionProperties.HeaderReference {
+		xml += fmt.Sprintf("<w:headerReference w:type=\"%s\" r:id=\"%s\" />",
+			headerRef.Type, headerRef.ID)
+	}
+
+	// 页脚引用
+	for _, footerRef := range b.SectionProperties.FooterReference {
+		xml += fmt.Sprintf("<w:footerReference w:type=\"%s\" r:id=\"%s\" />",
+			footerRef.Type, footerRef.ID)
+	}
 
 	// 页面大小
 	if b.SectionProperties.PageSize != nil {
@@ -163,18 +175,6 @@ func (b *Body) ToXML() string {
 	if b.SectionProperties.DocGrid != nil {
 		xml += fmt.Sprintf("<w:docGrid w:linePitch=\"%d\" />",
 			b.SectionProperties.DocGrid.LinePitch)
-	}
-
-	// 页眉引用
-	for _, headerRef := range b.SectionProperties.HeaderReference {
-		xml += fmt.Sprintf("<w:headerReference w:type=\"%s\" r:id=\"%s\" />",
-			headerRef.Type, headerRef.ID)
-	}
-
-	// 页脚引用
-	for _, footerRef := range b.SectionProperties.FooterReference {
-		xml += fmt.Sprintf("<w:footerReference w:type=\"%s\" r:id=\"%s\" />",
-			footerRef.Type, footerRef.ID)
 	}
 
 	xml += "</w:sectPr>"

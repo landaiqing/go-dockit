@@ -387,108 +387,105 @@ func (t *Table) ToXML() string {
 	// 添加表格属性
 	xml += "<w:tblPr>"
 
-	// 表格宽度
-	if t.Properties.Width > 0 {
-		xml += "<w:tblW w:w=\"" + fmt.Sprintf("%d", t.Properties.Width) + "\""
-		xml += " w:type=\"" + t.Properties.WidthType + "\" />"
-	} else {
-		xml += "<w:tblW w:w=\"0\" w:type=\"auto\" />"
+	// 表格样式ID
+	if t.Properties.Style != "" {
+		xml += fmt.Sprintf("<w:tblStyle w:val=\"%s\" />", t.Properties.Style)
 	}
+
+	// 表格宽度
+	xml += fmt.Sprintf("<w:tblW w:w=\"%d\" w:type=\"%s\" />", t.Properties.Width, t.Properties.WidthType)
 
 	// 表格对齐方式
 	if t.Properties.Alignment != "" {
-		xml += "<w:jc w:val=\"" + t.Properties.Alignment + "\" />"
+		xml += fmt.Sprintf("<w:jc w:val=\"%s\" />", t.Properties.Alignment)
 	}
 
 	// 表格缩进
 	if t.Properties.Indent > 0 {
-		xml += "<w:tblInd w:w=\"" + fmt.Sprintf("%d", t.Properties.Indent) + "\""
-		xml += " w:type=\"dxa\" />"
+		xml += fmt.Sprintf("<w:tblInd w:w=\"%d\" w:type=\"dxa\" />", t.Properties.Indent)
 	}
 
 	// 表格边框
 	if t.Properties.Borders != nil {
 		xml += "<w:tblBorders>"
 		if t.Properties.Borders.Top != nil {
-			xml += "<w:top w:val=\"" + t.Properties.Borders.Top.Style + "\""
-			xml += " w:sz=\"" + fmt.Sprintf("%d", t.Properties.Borders.Top.Size) + "\""
-			xml += " w:space=\"" + fmt.Sprintf("%d", t.Properties.Borders.Top.Space) + "\""
-			xml += " w:color=\"" + t.Properties.Borders.Top.Color + "\" />"
-		}
-		if t.Properties.Borders.Bottom != nil {
-			xml += "<w:bottom w:val=\"" + t.Properties.Borders.Bottom.Style + "\""
-			xml += " w:sz=\"" + fmt.Sprintf("%d", t.Properties.Borders.Bottom.Size) + "\""
-			xml += " w:space=\"" + fmt.Sprintf("%d", t.Properties.Borders.Bottom.Space) + "\""
-			xml += " w:color=\"" + t.Properties.Borders.Bottom.Color + "\" />"
+			xml += fmt.Sprintf("<w:top w:val=\"%s\" w:sz=\"%d\" w:space=\"%d\" w:color=\"%s\" />",
+				t.Properties.Borders.Top.Style,
+				t.Properties.Borders.Top.Size,
+				t.Properties.Borders.Top.Space,
+				t.Properties.Borders.Top.Color)
 		}
 		if t.Properties.Borders.Left != nil {
-			xml += "<w:left w:val=\"" + t.Properties.Borders.Left.Style + "\""
-			xml += " w:sz=\"" + fmt.Sprintf("%d", t.Properties.Borders.Left.Size) + "\""
-			xml += " w:space=\"" + fmt.Sprintf("%d", t.Properties.Borders.Left.Space) + "\""
-			xml += " w:color=\"" + t.Properties.Borders.Left.Color + "\" />"
+			xml += fmt.Sprintf("<w:left w:val=\"%s\" w:sz=\"%d\" w:space=\"%d\" w:color=\"%s\" />",
+				t.Properties.Borders.Left.Style,
+				t.Properties.Borders.Left.Size,
+				t.Properties.Borders.Left.Space,
+				t.Properties.Borders.Left.Color)
+		}
+		if t.Properties.Borders.Bottom != nil {
+			xml += fmt.Sprintf("<w:bottom w:val=\"%s\" w:sz=\"%d\" w:space=\"%d\" w:color=\"%s\" />",
+				t.Properties.Borders.Bottom.Style,
+				t.Properties.Borders.Bottom.Size,
+				t.Properties.Borders.Bottom.Space,
+				t.Properties.Borders.Bottom.Color)
 		}
 		if t.Properties.Borders.Right != nil {
-			xml += "<w:right w:val=\"" + t.Properties.Borders.Right.Style + "\""
-			xml += " w:sz=\"" + fmt.Sprintf("%d", t.Properties.Borders.Right.Size) + "\""
-			xml += " w:space=\"" + fmt.Sprintf("%d", t.Properties.Borders.Right.Space) + "\""
-			xml += " w:color=\"" + t.Properties.Borders.Right.Color + "\" />"
+			xml += fmt.Sprintf("<w:right w:val=\"%s\" w:sz=\"%d\" w:space=\"%d\" w:color=\"%s\" />",
+				t.Properties.Borders.Right.Style,
+				t.Properties.Borders.Right.Size,
+				t.Properties.Borders.Right.Space,
+				t.Properties.Borders.Right.Color)
 		}
 		if t.Properties.Borders.InsideH != nil {
-			xml += "<w:insideH w:val=\"" + t.Properties.Borders.InsideH.Style + "\""
-			xml += " w:sz=\"" + fmt.Sprintf("%d", t.Properties.Borders.InsideH.Size) + "\""
-			xml += " w:space=\"" + fmt.Sprintf("%d", t.Properties.Borders.InsideH.Space) + "\""
-			xml += " w:color=\"" + t.Properties.Borders.InsideH.Color + "\" />"
+			xml += fmt.Sprintf("<w:insideH w:val=\"%s\" w:sz=\"%d\" w:space=\"%d\" w:color=\"%s\" />",
+				t.Properties.Borders.InsideH.Style,
+				t.Properties.Borders.InsideH.Size,
+				t.Properties.Borders.InsideH.Space,
+				t.Properties.Borders.InsideH.Color)
 		}
 		if t.Properties.Borders.InsideV != nil {
-			xml += "<w:insideV w:val=\"" + t.Properties.Borders.InsideV.Style + "\""
-			xml += " w:sz=\"" + fmt.Sprintf("%d", t.Properties.Borders.InsideV.Size) + "\""
-			xml += " w:space=\"" + fmt.Sprintf("%d", t.Properties.Borders.InsideV.Space) + "\""
-			xml += " w:color=\"" + t.Properties.Borders.InsideV.Color + "\" />"
+			xml += fmt.Sprintf("<w:insideV w:val=\"%s\" w:sz=\"%d\" w:space=\"%d\" w:color=\"%s\" />",
+				t.Properties.Borders.InsideV.Style,
+				t.Properties.Borders.InsideV.Size,
+				t.Properties.Borders.InsideV.Space,
+				t.Properties.Borders.InsideV.Color)
 		}
 		xml += "</w:tblBorders>"
 	}
 
-	// 表格单元格边距
+	// 表格布局
+	if t.Properties.Layout != "" {
+		xml += fmt.Sprintf("<w:tblLayout w:type=\"%s\" />", t.Properties.Layout)
+	}
+
+	// 单元格边距
 	if t.Properties.CellMargin != nil {
 		xml += "<w:tblCellMar>"
 		if t.Properties.CellMargin.Top > 0 {
-			xml += "<w:top w:w=\"" + fmt.Sprintf("%d", t.Properties.CellMargin.Top) + "\""
-			xml += " w:type=\"dxa\" />"
-		}
-		if t.Properties.CellMargin.Bottom > 0 {
-			xml += "<w:bottom w:w=\"" + fmt.Sprintf("%d", t.Properties.CellMargin.Bottom) + "\""
-			xml += " w:type=\"dxa\" />"
+			xml += fmt.Sprintf("<w:top w:w=\"%d\" w:type=\"dxa\" />", t.Properties.CellMargin.Top)
 		}
 		if t.Properties.CellMargin.Left > 0 {
-			xml += "<w:left w:w=\"" + fmt.Sprintf("%d", t.Properties.CellMargin.Left) + "\""
-			xml += " w:type=\"dxa\" />"
+			xml += fmt.Sprintf("<w:left w:w=\"%d\" w:type=\"dxa\" />", t.Properties.CellMargin.Left)
+		}
+		if t.Properties.CellMargin.Bottom > 0 {
+			xml += fmt.Sprintf("<w:bottom w:w=\"%d\" w:type=\"dxa\" />", t.Properties.CellMargin.Bottom)
 		}
 		if t.Properties.CellMargin.Right > 0 {
-			xml += "<w:right w:w=\"" + fmt.Sprintf("%d", t.Properties.CellMargin.Right) + "\""
-			xml += " w:type=\"dxa\" />"
+			xml += fmt.Sprintf("<w:right w:w=\"%d\" w:type=\"dxa\" />", t.Properties.CellMargin.Right)
 		}
 		xml += "</w:tblCellMar>"
 	}
 
-	// 表格布局方式
-	if t.Properties.Layout != "" {
-		xml += "<w:tblLayout w:type=\"" + t.Properties.Layout + "\" />"
-	}
-
-	// 表格样式
-	if t.Properties.Style != "" {
-		xml += "<w:tblStyle w:val=\"" + t.Properties.Style + "\" />"
-	}
-
 	// 表格外观
 	if t.Properties.Look != "" {
-		xml += "<w:tblLook w:val=\"" + t.Properties.Look + "\""
-		xml += " w:firstRow=\"" + fmt.Sprintf("%d", boolToInt(t.Properties.FirstRow)) + "\""
-		xml += " w:lastRow=\"" + fmt.Sprintf("%d", boolToInt(t.Properties.LastRow)) + "\""
-		xml += " w:firstColumn=\"" + fmt.Sprintf("%d", boolToInt(t.Properties.FirstColumn)) + "\""
-		xml += " w:lastColumn=\"" + fmt.Sprintf("%d", boolToInt(t.Properties.LastColumn)) + "\""
-		xml += " w:noHBand=\"" + fmt.Sprintf("%d", boolToInt(t.Properties.NoHBand)) + "\""
-		xml += " w:noVBand=\"" + fmt.Sprintf("%d", boolToInt(t.Properties.NoVBand)) + "\" />"
+		xml += fmt.Sprintf("<w:tblLook w:val=\"%s\" w:firstRow=\"%v\" w:lastRow=\"%v\" w:firstColumn=\"%v\" w:lastColumn=\"%v\" w:noHBand=\"%v\" w:noVBand=\"%v\" />",
+			t.Properties.Look,
+			formatBoolToWXml(t.Properties.FirstRow),
+			formatBoolToWXml(t.Properties.LastRow),
+			formatBoolToWXml(t.Properties.FirstColumn),
+			formatBoolToWXml(t.Properties.LastColumn),
+			formatBoolToWXml(t.Properties.NoHBand),
+			formatBoolToWXml(t.Properties.NoVBand))
 	}
 
 	xml += "</w:tblPr>"
@@ -504,129 +501,133 @@ func (t *Table) ToXML() string {
 
 	// 添加所有行的XML
 	for _, row := range t.Rows {
-		xml += "<w:tr>"
-
-		// 添加行属性
-		xml += "<w:trPr>"
-
-		// 行高
-		if row.Properties.Height > 0 {
-			xml += "<w:trHeight w:val=\"" + fmt.Sprintf("%d", row.Properties.Height) + "\""
-			xml += " w:hRule=\"" + row.Properties.HeightRule + "\" />"
-		}
-
-		// 不允许跨页分割
-		if row.Properties.CantSplit {
-			xml += "<w:cantSplit />"
-		}
-
-		// 表头行
-		if row.Properties.IsHeader {
-			xml += "<w:tblHeader />"
-		}
-
-		xml += "</w:trPr>"
-
-		// 添加所有单元格的XML
-		for _, cell := range row.Cells {
-			xml += "<w:tc>"
-
-			// 添加单元格属性
-			xml += "<w:tcPr>"
-
-			// 单元格宽度
-			if cell.Properties.Width > 0 {
-				xml += "<w:tcW w:w=\"" + fmt.Sprintf("%d", cell.Properties.Width) + "\""
-				xml += " w:type=\"" + cell.Properties.WidthType + "\" />"
-			} else {
-				xml += "<w:tcW w:w=\"0\" w:type=\"auto\" />"
-			}
-
-			// 垂直对齐方式
-			if cell.Properties.VertAlign != "" {
-				xml += "<w:vAlign w:val=\"" + cell.Properties.VertAlign + "\" />"
-			}
-
-			// 单元格边框
-			if cell.Properties.Borders != nil {
-				xml += "<w:tcBorders>"
-				if cell.Properties.Borders.Top != nil {
-					xml += "<w:top w:val=\"" + cell.Properties.Borders.Top.Style + "\""
-					xml += " w:sz=\"" + fmt.Sprintf("%d", cell.Properties.Borders.Top.Size) + "\""
-					xml += " w:space=\"" + fmt.Sprintf("%d", cell.Properties.Borders.Top.Space) + "\""
-					xml += " w:color=\"" + cell.Properties.Borders.Top.Color + "\" />"
-				}
-				if cell.Properties.Borders.Bottom != nil {
-					xml += "<w:bottom w:val=\"" + cell.Properties.Borders.Bottom.Style + "\""
-					xml += " w:sz=\"" + fmt.Sprintf("%d", cell.Properties.Borders.Bottom.Size) + "\""
-					xml += " w:space=\"" + fmt.Sprintf("%d", cell.Properties.Borders.Bottom.Space) + "\""
-					xml += " w:color=\"" + cell.Properties.Borders.Bottom.Color + "\" />"
-				}
-				if cell.Properties.Borders.Left != nil {
-					xml += "<w:left w:val=\"" + cell.Properties.Borders.Left.Style + "\""
-					xml += " w:sz=\"" + fmt.Sprintf("%d", cell.Properties.Borders.Left.Size) + "\""
-					xml += " w:space=\"" + fmt.Sprintf("%d", cell.Properties.Borders.Left.Space) + "\""
-					xml += " w:color=\"" + cell.Properties.Borders.Left.Color + "\" />"
-				}
-				if cell.Properties.Borders.Right != nil {
-					xml += "<w:right w:val=\"" + cell.Properties.Borders.Right.Style + "\""
-					xml += " w:sz=\"" + fmt.Sprintf("%d", cell.Properties.Borders.Right.Size) + "\""
-					xml += " w:space=\"" + fmt.Sprintf("%d", cell.Properties.Borders.Right.Space) + "\""
-					xml += " w:color=\"" + cell.Properties.Borders.Right.Color + "\" />"
-				}
-				xml += "</w:tcBorders>"
-			}
-
-			// 底纹
-			if cell.Properties.Shading != nil {
-				xml += "<w:shd w:val=\"" + cell.Properties.Shading.Pattern + "\""
-				xml += " w:fill=\"" + cell.Properties.Shading.Fill + "\""
-				xml += " w:color=\"" + cell.Properties.Shading.Color + "\" />"
-			}
-
-			// 跨列数
-			if cell.Properties.GridSpan > 1 {
-				xml += "<w:gridSpan w:val=\"" + fmt.Sprintf("%d", cell.Properties.GridSpan) + "\" />"
-			}
-
-			// 垂直合并
-			if cell.Properties.VMerge != "" {
-				xml += "<w:vMerge w:val=\"" + cell.Properties.VMerge + "\" />"
-			}
-
-			// 不换行
-			if cell.Properties.NoWrap {
-				xml += "<w:noWrap />"
-			}
-
-			// 适应文本
-			if cell.Properties.FitText {
-				xml += "<w:fitText />"
-			}
-
-			xml += "</w:tcPr>"
-
-			// 添加所有内容元素的XML
-			for _, content := range cell.Content {
-				switch v := content.(type) {
-				case *Paragraph:
-					xml += v.ToXML()
-				case *Table:
-					xml += v.ToXML()
-				}
-			}
-
-			// 如果单元格没有内容，添加一个空段落
-			if len(cell.Content) == 0 {
-				xml += "<w:p><w:pPr></w:pPr></w:p>"
-			}
-
-			xml += "</w:tc>"
-		}
-
-		xml += "</w:tr>"
+		xml += row.ToXML()
 	}
 
 	xml += "</w:tbl>"
+	return xml
+}
+
+// formatBoolToWXml 将布尔值转换为Word XML中使用的字符串表示
+func formatBoolToWXml(value bool) string {
+	if value {
+		return "1"
+	}
+	return "0"
+}
+
+// ToXML 将表格行转换为XML
+func (r *TableRow) ToXML() string {
+	xml := "<w:tr>"
+
+	// 添加行属性
+	xml += "<w:trPr>"
+
+	// 行高
+	if r.Properties.Height > 0 {
+		xml += "<w:trHeight w:val=\"" + fmt.Sprintf("%d", r.Properties.Height) + "\" w:hRule=\"" + r.Properties.HeightRule + "\" />"
+	}
+
+	// 不允许跨页分割
+	if r.Properties.CantSplit {
+		xml += "<w:cantSplit />"
+	}
+
+	// 表头行
+	if r.Properties.IsHeader {
+		xml += "<w:tblHeader />"
+	}
+
+	xml += "</w:trPr>"
+
+	// 添加所有单元格的XML
+	for _, cell := range r.Cells {
+		xml += cell.ToXML()
+	}
+
+	xml += "</w:tr>"
+	return xml
+}
+
+// ToXML 将表格单元格转换为XML
+func (c *TableCell) ToXML() string {
+	xml := "<w:tc>"
+
+	// 添加单元格属性
+	xml += "<w:tcPr>"
+
+	// 单元格宽度
+	if c.Properties.Width > 0 {
+		xml += "<w:tcW w:w=\"" + fmt.Sprintf("%d", c.Properties.Width) + "\" w:type=\"" + c.Properties.WidthType + "\" />"
+	} else {
+		xml += "<w:tcW w:w=\"0\" w:type=\"auto\" />"
+	}
+
+	// 垂直对齐方式
+	if c.Properties.VertAlign != "" {
+		xml += "<w:vAlign w:val=\"" + c.Properties.VertAlign + "\" />"
+	}
+
+	// 单元格边框
+	if c.Properties.Borders != nil {
+		xml += "<w:tcBorders>"
+		if c.Properties.Borders.Top != nil {
+			xml += "<w:top w:val=\"" + c.Properties.Borders.Top.Style + "\" w:sz=\"" + fmt.Sprintf("%d", c.Properties.Borders.Top.Size) + "\" w:space=\"" + fmt.Sprintf("%d", c.Properties.Borders.Top.Space) + "\" w:color=\"" + c.Properties.Borders.Top.Color + "\" />"
+		}
+		if c.Properties.Borders.Bottom != nil {
+			xml += "<w:bottom w:val=\"" + c.Properties.Borders.Bottom.Style + "\" w:sz=\"" + fmt.Sprintf("%d", c.Properties.Borders.Bottom.Size) + "\" w:space=\"" + fmt.Sprintf("%d", c.Properties.Borders.Bottom.Space) + "\" w:color=\"" + c.Properties.Borders.Bottom.Color + "\" />"
+		}
+		if c.Properties.Borders.Left != nil {
+			xml += "<w:left w:val=\"" + c.Properties.Borders.Left.Style + "\" w:sz=\"" + fmt.Sprintf("%d", c.Properties.Borders.Left.Size) + "\" w:space=\"" + fmt.Sprintf("%d", c.Properties.Borders.Left.Space) + "\" w:color=\"" + c.Properties.Borders.Left.Color + "\" />"
+		}
+		if c.Properties.Borders.Right != nil {
+			xml += "<w:right w:val=\"" + c.Properties.Borders.Right.Style + "\" w:sz=\"" + fmt.Sprintf("%d", c.Properties.Borders.Right.Size) + "\" w:space=\"" + fmt.Sprintf("%d", c.Properties.Borders.Right.Space) + "\" w:color=\"" + c.Properties.Borders.Right.Color + "\" />"
+		}
+		xml += "</w:tcBorders>"
+	}
+
+	// 底纹
+	if c.Properties.Shading != nil {
+		xml += "<w:shd w:val=\"" + c.Properties.Shading.Pattern + "\" w:fill=\"" + c.Properties.Shading.Fill + "\" w:color=\"" + c.Properties.Shading.Color + "\" />"
+	}
+
+	// 跨列数
+	if c.Properties.GridSpan > 1 {
+		xml += "<w:gridSpan w:val=\"" + fmt.Sprintf("%d", c.Properties.GridSpan) + "\" />"
+	}
+
+	// 垂直合并
+	if c.Properties.VMerge != "" {
+		xml += "<w:vMerge w:val=\"" + c.Properties.VMerge + "\" />"
+	}
+
+	// 不换行
+	if c.Properties.NoWrap {
+		xml += "<w:noWrap />"
+	}
+
+	// 适应文本
+	if c.Properties.FitText {
+		xml += "<w:fitText />"
+	}
+
+	xml += "</w:tcPr>"
+
+	// 添加所有内容元素的XML
+	for _, content := range c.Content {
+		switch v := content.(type) {
+		case *Paragraph:
+			xml += v.ToXML()
+		case *Table:
+			xml += v.ToXML()
+		}
+	}
+
+	// 如果单元格没有内容，添加一个空段落
+	if len(c.Content) == 0 {
+		xml += "<w:p><w:pPr></w:pPr></w:p>"
+	}
+
+	xml += "</w:tc>"
 	return xml
 }

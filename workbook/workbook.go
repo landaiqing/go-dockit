@@ -71,6 +71,11 @@ func (wb *Workbook) Save(filename string) error {
 	zipWriter := zip.NewWriter(file)
 	defer zipWriter.Close()
 
+	// 为每个工作表添加内容类型覆盖
+	for i := range wb.Worksheets {
+		wb.ContentTypes.AddWorksheetOverride(i + 1)
+	}
+
 	// 添加[Content_Types].xml
 	contentTypesWriter, err := zipWriter.Create("[Content_Types].xml")
 	if err != nil {

@@ -259,7 +259,7 @@ func main() {
 	})
 
 	// 保存Excel文件
-	err := wb.Save("sales_report.xlsx")
+	err := wb.Save("./workbook/examples/simple/sales_report.xlsx")
 	if err != nil {
 		fmt.Println("保存Excel文件时出错:", err)
 		return
